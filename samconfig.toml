@@ -1,0 +1,11 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "playhem"
+s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-17x27gkpekzbg"
+s3_prefix = "playhem"
+region = "eu-west-1"
+profile = "playhem"
+capabilities = "CAPABILITY_IAM"
+image_repositories = []

@@ -1,0 +1,4 @@
+{
+    "cfn-resource-actions.stackName": "playhem",
+    "cfn-resource-actions.AWSProfile": "private"
+}
