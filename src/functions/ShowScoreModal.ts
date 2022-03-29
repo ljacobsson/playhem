@@ -58,7 +58,7 @@ exports.handler = async (event: Interaction) => {
               type: 'static_select',
               placeholder: {
                 type: 'plain_text',
-                text: 'Select an item',
+                text: 'Player 1 score',
                 emoji: true
               },
               options: options,
@@ -77,7 +77,7 @@ exports.handler = async (event: Interaction) => {
               type: 'static_select',
               placeholder: {
                 type: 'plain_text',
-                text: 'Select an item',
+                text: 'Player 2 score',
                 emoji: true
               },
               options: options,

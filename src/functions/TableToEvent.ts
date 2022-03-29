@@ -8,7 +8,11 @@ exports.handler = async function (event: DynamoDBStreamEvent) {
     const newImg = record.dynamodb?.NewImage ? AWS.DynamoDB.Converter.unmarshall(record.dynamodb?.NewImage) : null;
     const type = newImg?.PK?.split('#')[0];
 
-    const detail = { data: { old: oldImg, new: newImg }, metadata: { op: record.eventName } };
+    const detail = {
+      data: { old: oldImg, new: newImg },
+      metadata: { op: record.eventName, timestamp: new Date().getTime() }
+    };
+
     const result = await eventBridge
       .putEvents({
         Entries: [

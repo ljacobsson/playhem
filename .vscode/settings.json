@@ -1,4 +1,5 @@
 {
     "cfn-resource-actions.stackName": "playhem",
-    "cfn-resource-actions.AWSProfile": "private"
+    "eventbridge-assistant.AWSProfile": "playhem",
+    "cfn-resource-actions.AWSProfile": "playhem"
 }

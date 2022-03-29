@@ -45,11 +45,6 @@ exports.handler = async function (event: Interaction) {
     text: 'Leaderboard',
     blocks: [
       {
-        type: 'image',
-        image_url: 'https://www.gp.se/image/policy:1.511058:1462561117/image.jpg?f=Wide&w=1200&$p$f$w=834285a',
-        alt_text: 'marg'
-      },
-      {
         type: 'section',
         text: {
           type: 'mrkdwn',
