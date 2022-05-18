@@ -7,7 +7,7 @@ const slack = new WebClient(token);
 
 exports.handler = async function (event: GameEntry) {
   await slack.chat.postMessage({
-    channel: '#playhem-test',
+    channel: '#pingpong',
     blocks: [
       {
         type: 'section',

@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Transform:
-  - 'AWS::Serverless-2016-10-31'
+  - AWS::Serverless-2016-10-31
 Globals:
   Function:
     CodeUri: ./src
@@ -9,12 +9,12 @@ Globals:
     Timeout: 15
 Resources:
   SlackToken:
-    Type: 'AWS::SecretsManager::Secret'
+    Type: AWS::SecretsManager::Secret
     Properties:
-      Name: !Sub '${AWS::StackName}-slack-token'
+      Name: !Sub ${AWS::StackName}-slack-token
       SecretString: '{"token": "added manually"}'
   Table:
-    Type: 'AWS::DynamoDB::Table'
+    Type: AWS::DynamoDB::Table
     Properties:
       AttributeDefinitions:
         - AttributeName: PK
@@ -39,7 +39,7 @@ Resources:
       StreamSpecification:
         StreamViewType: NEW_AND_OLD_IMAGES
   SaveMatchScore:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       Handler: functions/SaveMatchScore.handler
       Environment:
@@ -63,7 +63,7 @@ Resources:
     Metadata:
       BuildMethod: esbuild
   ShowScoreModal:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     DependsOn:
       - SlackToken
     Properties:
@@ -89,7 +89,7 @@ Resources:
     Metadata:
       BuildMethod: esbuild
   ShowLeaderboard:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     DependsOn:
       - SlackToken
     Properties:
@@ -99,7 +99,7 @@ Resources:
           SlackToken: '{{resolve:secretsmanager:playhem-slack-token:SecretString:token}}'
           TableName: !Ref Table
       Events:
-        NewScore:
+        Leaderboard:
           Type: EventBridgeRule
           Properties:
             InputPath: $.detail
@@ -115,11 +115,11 @@ Resources:
                   - l
       Policies:
         - DynamoDBReadPolicy:
-            TableName: !Ref Table
+            TableName: !Ref Table            
     Metadata:
       BuildMethod: esbuild
   WebhookReceiver:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       Handler: functions/WebhookReceiver.handler
       Events:
@@ -134,15 +134,15 @@ Resources:
     Metadata:
       BuildMethod: esbuild
   EventBus:
-    Type: 'AWS::Events::EventBus'
+    Type: AWS::Events::EventBus
     Properties:
       Name: playhem
   PlayhemEventDiscoverer:
-    Type: 'AWS::EventSchemas::Discoverer'
+    Type: AWS::EventSchemas::Discoverer
     Properties:
       SourceArn: !GetAtt EventBus.Arn
   TableToEvent:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       Handler: functions/TableToEvent.handler
       Runtime: nodejs14.x
@@ -162,13 +162,13 @@ Resources:
             - Sid: Statement1
               Effect: Allow
               Action:
-                - 'events:PutEvents'
+                - events:PutEvents
               Resource:
                 - !GetAtt EventBus.Arn
     Metadata:
       BuildMethod: esbuild
   CalculateRating:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
       Handler: functions/CalculateRating.handler
@@ -188,13 +188,17 @@ Resources:
                 - playhem-Table
               detail-type:
                 - GAME
+              detail:
+                metadata:
+                  op:
+                    - INSERT
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref Table
     Metadata:
       BuildMethod: esbuild
   ShowMatchUpdate:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
       CodeUri: src/
       Handler: functions/ShowMatchUpdate.handler
@@ -214,21 +218,22 @@ Resources:
                 - playhem-Table
               detail-type:
                 - GAME
+              detail:
+                metadata:
+                  op:
+                    - INSERT
     Metadata:
       BuildMethod: esbuild
   RecordRatingMetric:
-    Type: 'AWS::Serverless::Function'
+    Type: AWS::Serverless::Function
     Properties:
-      CodeUri: src/
       Handler: functions/RecordRatingMetric.handler
-      Runtime: nodejs14.x
-      Timeout: 10
       Events:
-        DynamoDBEvent:
+        UserUpdatedEvent:
           Type: EventBridgeRule
           Properties:
-            EventBusName: playhem
             InputPath: $.detail.data.new
+            EventBusName: playhem
             Pattern:
               source:
                 - playhem-Table
@@ -239,4 +244,4 @@ Resources:
 
 Outputs:
   EndpointUrl:
-    Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod'
+    Value: !Sub https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod
