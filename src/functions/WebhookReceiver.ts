@@ -8,11 +8,16 @@ exports.handler = async function (event: APIGatewayProxyEvent) {
   console.log(body, event.body);
   let type;
   if (body.payload) {
-    type = JSON.parse(body.payload.toString()).type;
-    body.payload = JSON.parse(body.payload.toString());
+    const payload = JSON.parse(body.payload.toString());
+    type = payload.type;
+    body.payload = payload;
+    if (type === 'view_submission') {
+      type = payload.view.callback_id;
+    }
   } else {
     type = 'slash_command';
   }
+  console.log('type', type);
   await eventBridge
     .putEvents({
       Entries: [

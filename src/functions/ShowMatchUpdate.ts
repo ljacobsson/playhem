@@ -24,13 +24,18 @@ exports.handler = async function (event: GameEntry) {
             text: ':pepoclap: *Winner*'
           },
           {
-            type: 'mrkdwn',
-            text: ':peeporuncry: *Loser*'
-          },
-          {
             type: 'plain_text',
             text: event.Winner.Name,
             emoji: true
+          }
+        ]
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: ':peeporuncry: *Loser*'
           },
           {
             type: 'plain_text',

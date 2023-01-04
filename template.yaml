@@ -56,12 +56,36 @@ Resources:
               source:
                 - slack
               detail-type:
-                - view_submission
+                - save_score
       Policies:
         - DynamoDBWritePolicy:
             TableName: !Ref Table
     Metadata:
       BuildMethod: esbuild
+  SaveTournament:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: functions/SaveTournament.handler
+      Environment:
+        Variables:
+          TableName: !Ref Table
+          SlackToken: '{{resolve:secretsmanager:playhem-slack-token:SecretString:token}}'
+      Events:
+        Submission:
+          Type: EventBridgeRule
+          Properties:
+            InputPath: $.detail.payload.view.state.values.input.tournament_name
+            EventBusName: playhem
+            Pattern:
+              source:
+                - slack
+              detail-type:
+                - create_tournament
+      Policies:
+        - DynamoDBWritePolicy:
+            TableName: !Ref Table
+    Metadata:
+      BuildMethod: esbuild      
   ShowScoreModal:
     Type: AWS::Serverless::Function
     DependsOn:
@@ -118,6 +142,36 @@ Resources:
             TableName: !Ref Table            
     Metadata:
       BuildMethod: esbuild
+  ShowCreateTournamentModal:
+    Type: AWS::Serverless::Function
+    DependsOn:
+      - SlackToken
+    Properties:
+      Handler: functions/ShowCreateTournamentModal.handler
+      Environment:
+        Variables:
+          SlackToken: '{{resolve:secretsmanager:playhem-slack-token:SecretString:token}}'
+          TableName: !Ref Table
+      Events:
+        CreateTournament:
+          Type: EventBridgeRule
+          Properties:
+            InputPath: $.detail
+            EventBusName: playhem
+            Pattern:
+              source:
+                - slack
+              detail-type:
+                - slash_command
+              detail:
+                text:
+                  - create-tournament
+                  - cr
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref Table            
+    Metadata:
+      BuildMethod: esbuild      
   WebhookReceiver:
     Type: AWS::Serverless::Function
     Properties:
@@ -132,7 +186,7 @@ Resources:
         - EventBridgePutEventsPolicy:
             EventBusName: playhem
     Metadata:
-      BuildMethod: esbuild
+      BuildMethod: esbuild      
   EventBus:
     Type: AWS::Events::EventBus
     Properties:

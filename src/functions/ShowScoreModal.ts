@@ -23,6 +23,7 @@ exports.handler = async (event: Interaction) => {
   await slack.views.open({
     trigger_id: event.trigger_id,
     view: {
+      callback_id: 'save_score',
       type: 'modal',
       title: {
         type: 'plain_text',
